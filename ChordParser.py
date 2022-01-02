@@ -3,95 +3,58 @@ from copy import deepcopy
 
 class ChordParser:
 
-    def __init__(self):
-        pass
-
-    @classmethod    
-    def decompose_chord_str(cls, chord_str):
+    def __init__(
+            self, 
+            chord_type_matches: list=None):
+        if chord_type_matches is None:
+            self.chord_type_matches = [  # (third, fifth, seventh)
+                ('sus2', ('sus2', 'perfect', None)),
+                ('sus4', ('sus4', 'perfect', None)),
+                ('dim7', ('minor', 'dim', 'minor')),
+                ('dim', ('minor', 'dim', None)),
+                ('aug7', ('major', 'aug', 'minor')),
+                ('aug', ('major', 'aug', None)),
+                ('maj7', ('major', 'perfect', 'major')),
+                ('m7', ('minor', 'perfect', 'minor')),
+                ('mM7', ('minor',  'perfect', 'major')),
+                ('7', ('major', 'perfect', 'minor')),
+                ('m', ('minor', 'perfect', None)),
+                ('', ('major', 'perfect', None))  
+            ]
+        else:
+            self.chord_type_matches = chord_type_matches
+    
+    def decompose_chord_str(self, chord_str):
 
         unprocessed = deepcopy(chord_str)  # copy
 
         # ROOT
         if len(unprocessed) == 1:  # white key major chords
-            map_root = unprocessed[0]
+            root = unprocessed[0]
             unprocessed = unprocessed[1:]
         else:
             if unprocessed[1] in ['b', '#']:
-                map_root = unprocessed[0:2]
+                root = unprocessed[0:2]
                 unprocessed = unprocessed[2:]
 
         # BASS
         if '/' in unprocessed:  # bass different from root
             unprocessed_split = unprocessed.split('/')
-            map_bass = unprocessed_split[1] # bass
+            bass = unprocessed_split[1] # bass
             unprocessed = unprocessed_split[0] # rest
 
         else:  # bass same as root
-            map_bass = map_root
+            bass = root
 
         # by now, the root has been parsed out from unprocessed
-        # THIRD AND FIFTH
-        map_third = 'major'  # the default
-        map_fifth = 'perfect'  # the default
-        map_seventh = 'None'
-        extensions = unprocessed
+        # CHORD
+        # if no patterns are identified, default to major
+        chord_type = ('major', 'perfect', None)
+        for pattern, chord_hash in self.chord_type_matches:
+            if pattern in unprocessed:
+                chord_type = chord_hash
 
-        if len(unprocessed) == 0:
-            map_third = 'major'
-            extensions = ''
-
-        elif unprocessed[0:3] == 'dim':
-            map_third = 'minor'
-            map_fifth = 'flat'
-            extensions = unprocessed[3:]
-
-        elif unprocessed[0:3] in ['maj', 'add']:
-            map_third = 'major'
-            extensions = unprocessed
-
-        elif unprocessed[0:3] in ['m7M', 'mM7', 'm7+']: # all are used
-            map_third = 'minor'
-            map_seventh = 'major'
-            extensions = unprocessed[3:]
-
-        elif unprocessed[0:2] == 'm7':
-            map_third = 'minor'
-            map_seventh = 'minor'
-            extensions = unprocessed[2:]
-
-        elif unprocessed[0:2] in ['7M', 'M7', '7+']: #all are used
-            map_seventh = 'major'
-            extensions = unprocessed[2:]
-        
-        elif unprocessed[0] == 'm':
-            map_third = 'minor'
-            extensions = unprocessed[1:]
-
-        elif unprocessed[0] == '9':
-            map_seventh = 'minor'
-        
-        elif unprocessed[0] == '7':
-            map_seventh = 'minor'
-            extensions = unprocessed[1:]
-
-        elif unprocessed[0] == '5':
-            map_third = 'None'
-            extensions = unprocessed[1:]
-
-        elif unprocessed[0] == '4':
-            map_third = 'sus4'
-            extensions = unprocessed[1:]
-
-        #capturing an augmented chord
-        if extensions[0:4] == '(5+)':
-            map_fifth = 'sharp'
-            extensions = extensions[4:]
-
-        map_chord = {'chord': chord, 'root': map_root, 'third': map_third, 
-                    'fifth': map_fifth, 'seventh': map_seventh,
-                    'bass': map_bass, 'extensions': extensions}
-
-        return map_chord
+        return (bass, root, chord_type)
 
 
     # auxiliary (static) methods
