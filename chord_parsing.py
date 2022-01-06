@@ -1,11 +1,13 @@
 from copy import deepcopy
 
+import utils
+
 
 def parse_progression_str(
     progession_str: str,
     sep: str = ' - ',
     chord_type_matches: list = None) -> list:
-    '''
+    """
     Transform string containing chord progression into list of chord hashes.
     Uses chord_parsing.parse_chord_str() for each chord.
 
@@ -15,17 +17,17 @@ def parse_progression_str(
         chord_type_matches (list): refer to chord_parsing.parse_chord_str()'s docstring
     Returns:
         list: list of chord_hash tuples (refer to chord_parsing.parse_chord_str()'s docstring)
-    '''
+    """
     prog_input_list = progession_str.split(sep)
-    chord_hash_list = [parse_chord_str(c) for c in prog_input_list]
+    prog_chord_hashes = [parse_chord_str(c, chord_type_matches) for c in prog_input_list]
 
-    return chord_hash_list
+    return prog_chord_hashes
 
 
 def parse_chord_str(
         chord_str: str,
-        chord_type_matches: list = None) -> tuple:
-    '''
+        chord_description_mappings: list = None) -> tuple:
+    """
     Transform string containing chord into chord hash.
     Chord hash format: (bass, root, chord_type)
 
@@ -39,17 +41,17 @@ def parse_chord_str(
                 seventh (str): one of {minor, major, None}
     Returns:
         tuple: chord_hash tuple containing bass, root and chord_type
-            bass (int): integer notation (C-B -> 0-11)
-            root (int): integer notation (C-B -> 0-11)
+            bass (int): integer notation (C-B -> 0-11, refer to utils.letterToInt())
+            root (int): integer notation (C-B -> 0-11, refer to utils.letterToInt())
             chord_type (tuple): (third, fifth, seventh)
                 third (str): one of {sus2, minor, sus4, major, None}
                 fifth (str): one of {dim, perfect, aug, None}
                 seventh (str): one of {minor, major, None}
-    '''
-    if chord_type_matches is None:
+    """
+    if chord_description_mappings is None:
         # format: (third, fifth, seventh)
         # ignoring extensions beyond the seventh
-        chord_type_matches = [
+        chord_description_mappings = [
             ('sus2', ('sus2', 'perfect', None)),
             ('sus4', ('sus4', 'perfect', None)),
             ('dim7', ('minor', 'dim', 'minor')),
@@ -92,38 +94,15 @@ def parse_chord_str(
     # CHORD
     # if no patterns are identified, default to major
     chord_type = ('major', 'perfect', None)
-    for patt, c_type in chord_type_matches:
+    for patt, c_tone_descr in chord_description_mappings:
         if patt in unprocessed:
-            chord_type = c_type
+            chord_type = c_tone_descr
 
     # convert note letters to integer notation
-    bass = letterToInt(bass_str)
-    root = letterToInt(root_str)
+    bass = utils.letterToInt(bass_str)
+    root = utils.letterToInt(root_str)
 
-    return (bass, root, chord_type)
+    chord_hash = (bass, root, chord_type) 
 
+    return chord_hash
 
-def letterToInt(letter_note: str) -> int:
-    '''Map note letter to integer notation (C-B -> 0-11).'''
-    mapping = {'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4,
-            'F': 5, 'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9,
-            'A#': 10, 'Bb': 10, 'B': 11}
-    int_note = standardize(mapping[letter_note])
-    return int_note
-
-
-def intToLetter(int_note: int) -> str:
-    '''Map integer notation to note letter (0-11 -> C-B).'''
-    mapping = {0: 'C', 1: 'C#', 2: 'D', 3: 'D#', 4: 'E', 5: 'F', 6: 'F#',
-            7: 'G', 8: 'G#', 9: 'A', 10: 'A#', 11: 'B'}
-    letter_note = standardize(mapping[int_note])
-    return letter_note
-
-
-def standardize(unstd_int_note: int) -> int:
-    '''Standardize values outside of integer notation range (0-11).'''
-    int_note = unstd_int_note
-    while int_note < 0:
-        int_note += 12
-    int_note = int_note % 12
-    return int_note
