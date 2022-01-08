@@ -5,7 +5,7 @@ import utils
 
 def parse_progression_str(
     progession_str: str,
-    sep: str = ' - ',
+    sep: str = '-',
     chord_type_matches: list = None) -> list:
     """
     Transform string containing chord progression into list of chord hashes.

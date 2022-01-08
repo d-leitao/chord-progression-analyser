@@ -1,7 +1,11 @@
 import utils
 
 
-def predict_major_key(prog_chord_hashes):
+def progession_chord_hashes_to_roman(prog_chord_hashes):
+    raise NotImplementedError
+
+
+def predict_major_key(prog_chord_hashes: list):
     """
     Predict relative major of the progression's key.
     Returns key's root in integer notation.
@@ -35,7 +39,7 @@ def predict_major_key(prog_chord_hashes):
     return best_key
 
 
-def chord_hash_to_notes(chord_hash):
+def chord_hash_to_notes(chord_hash: tuple):
     """
     Transform chord_hash to list of notes (absolutes in integer notation).
     Refer to parse_chord_str()'s docstring for the format of chord_hash.
