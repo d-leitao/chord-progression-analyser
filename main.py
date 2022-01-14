@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 
 import chord_parsing as cp
@@ -9,7 +10,11 @@ def main():
     Function for Chord Progression Analyser's main app.
     """
     FILEPATH = 'data/progressions.csv'
-    records = pd.read_csv(FILEPATH, quoting=1, quotechar='"')
+    cols = ['title', 'author', 'progression', 'key', 'mode', 'review']
+    if os.path.exists(FILEPATH):
+        records = pd.read_csv(FILEPATH, names=cols, quoting=1, quotechar='"')
+    else:
+        records = pd.DataFrame(columns=cols)
 
     main_input = main_menu()
     if main_input == '1':
@@ -49,7 +54,6 @@ def analyse_new_progression(records: pd.DataFrame):
         sep=sep)
 
     major_key = mt.predict_major_key(progression_chord_hashes)
-    raise NotImplementedError
 
 
 if __name__ == '__main__':
