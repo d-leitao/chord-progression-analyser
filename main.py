@@ -1,4 +1,3 @@
-import csv
 import pandas as pd
 
 import chord_parsing as cp
@@ -10,15 +9,15 @@ def main():
     Function for Chord Progression Analyser's main app.
     """
     FILEPATH = 'data/progressions.csv'
-    records = pd.read_csv(FILEPATH, sep=',')
+    records = pd.read_csv(FILEPATH, quoting=1, quotechar='"')
 
     main_input = main_menu()
-    if main_input == 1:
+    if main_input == '1':
         analyse_new_progression(records)
-    elif main_input == 2:
+    elif main_input == '2':
         pass
 
-    records.to_csv(FILEPATH, sep=', ', quoting=csv.QUOTE_ALL, quotechar='"')
+    records.to_csv(FILEPATH, index=False, quoting=1, quotechar='"')
 
 
 def main_menu():
@@ -26,11 +25,11 @@ def main_menu():
     Main menu displayer & input manager.
     """
     options = {
-        1: 'Analyse new progression',
-        2: 'Analyse old progression'}
+        '1': 'Analyse new progression',
+        '2': 'Analyse old progression'}
     
-    for k, v in options:
-        print(f'{k} - {v}')
+    for k in options:
+        print(f'{k} - {options[k]}')
 
     main_input = input('> ')
 
@@ -43,7 +42,7 @@ def main_menu():
 def analyse_new_progression(records: pd.DataFrame):
 
     sep = '-'
-    print(f'Insert progression (sep="{sep}"):')
+    print(f'\nInsert progression (sep="{sep}"):')
     progression_input = input('> ')
     progression_chord_hashes = cp.parse_progression_str(
         progression_str=progression_input,

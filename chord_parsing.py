@@ -4,9 +4,9 @@ import utils
 
 
 def parse_progression_str(
-    progession_str: str,
-    sep: str = '-',
-    chord_type_matches: list = None) -> list:
+    progression_str: str,
+    chord_type_matches: list = None,
+    sep: str = '-') -> list:
     """
     Transform string containing chord progression into list of chord hashes.
     Uses chord_parsing.parse_chord_str() for each chord.
@@ -18,7 +18,7 @@ def parse_progression_str(
     Returns:
         list: list of chord_hash tuples (refer to chord_parsing.parse_chord_str()'s docstring)
     """
-    prog_input_list = progession_str.split(sep)
+    prog_input_list = progression_str.split(sep)
     prog_chord_hashes = [parse_chord_str(c, chord_type_matches) for c in prog_input_list]
 
     return prog_chord_hashes
@@ -62,7 +62,7 @@ def parse_chord_str(
             ('m7', ('minor', 'perfect', 'minor')),
             ('mM7', ('minor',  'perfect', 'major')),
             ('7', ('major', 'perfect', 'minor')),
-            ('5', (None, 'perfect', None))
+            ('5', (None, 'perfect', None)),
             ('m', ('minor', 'perfect', None)),
             ('', ('major', 'perfect', None))
         ]

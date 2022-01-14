@@ -24,7 +24,7 @@ def predict_major_key(prog_chord_hashes: list):
         n_notes_in_key = len([note for note in all_notes if note in possible_key_notes])
         key_scores[possible_root] = n_notes_in_key / n_notes
 
-    best_keys = [k for k, v in key_scores if v == max(key_scores.values())]
+    best_keys = [k for k in key_scores if key_scores[k] == max(key_scores.values())]
 
     if len(best_keys) == 1:
         best_key = best_keys[0]
@@ -45,14 +45,17 @@ def chord_hash_to_notes(chord_hash: tuple):
     Refer to parse_chord_str()'s docstring for the format of chord_hash.
     """
     tone_to_interval_mappings = {
-        'third': {'sus2': 2, 'minor': 3, 'sus4': 5, 'major': 7},
-        'fifth': {'dim': 6, 'perfect': 7, 'aug': 8},
-        'seventh': {'minor': 10, 'major': 11}
+        0:  # third
+            {'sus2': 2, 'minor': 3, 'sus4': 5, 'major': 7},
+        1:  # fifth
+            {'dim': 6, 'perfect': 7, 'aug': 8},
+        2:  # seventh
+            {'minor': 10, 'major': 11}
     }
     bass, root, chord_description = chord_hash
     other_notes = [
-        utils.standardize(root + tone_to_interval_mappings[d])
-        for d in chord_description
+        utils.standardize(root + tone_to_interval_mappings[ix][d])
+        for ix, d in enumerate(chord_description)
         if d is not None
     ]
     notes_list = [bass, root, *other_notes]
